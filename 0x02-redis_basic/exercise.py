@@ -44,7 +44,7 @@ class Cache:
         return str(key)
 
     def get(self, key: str, fn: Optional[Callable] = None) ->\
-        Union[str, bytes, int, float]:
+            Union[str, bytes, int, float]:
         """retieves value from server, convert it to desired format"""
         return fn(self._redis.get(key)) if fn else self._redis.get(key)
 
