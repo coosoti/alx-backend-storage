@@ -10,9 +10,23 @@ Create a store method that takes a data argument and returns a string. The
 Type-annotate store correctly. Remember that data can be a str, bytes, int
  or float
 """
-from typing import Callable, Optional, Union
+from typing import Callable, Counter, Optional, Union
 import redis
+import sys
 import uuid
+from functools import wraps
+
+
+def count_method_calls(method: Callable) -> Callable:
+    """count number of calls made to a method"""
+    key = method.__qualname__
+
+    @wraps(method)
+    def counter(self, *args, **kwargs):
+        """decorator method"""
+        self._redis.incr(key)
+        return method(self, *args, **kwargs)
+    return counter
 
 
 class Cache:
@@ -22,6 +36,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_method_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """this method takes data argument and returns a string"""
         key = uuid.uuid4()
