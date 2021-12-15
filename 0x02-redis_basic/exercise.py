@@ -17,7 +17,7 @@ import uuid
 from functools import wraps
 
 
-def count_method_calls(method: Callable) -> Callable:
+def count_calls(method: Callable) -> Callable:
     """count number of calls made to a method"""
     key = method.__qualname__
 
@@ -36,7 +36,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
-    @count_method_calls
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """this method takes data argument and returns a string"""
         key = uuid.uuid4()
