@@ -10,7 +10,7 @@ Create a store method that takes a data argument and returns a string. The
 Type-annotate store correctly. Remember that data can be a str, bytes, int
  or float
 """
-from typing import Union
+from typing import Callable, Optional, Union
 import redis
 import uuid
 
@@ -27,3 +27,16 @@ class Cache:
         key = uuid.uuid4()
         self._redis.set(str(key), data)
         return str(key)
+
+    def get(self, key: str, fn: Optional[Callable] = None) ->\
+        Union[str, bytes, int, float]:
+        """retieves value from server, convert it to desired format"""
+        return fn(self._redis.get(key)) if fn else self._redis.get(key)
+
+    def get_int(self, data_bytes: bytes) -> int:
+        """convert data bytes from server back to int"""
+        return int.from_bytes(data_bytes, sys.byteorder)
+
+    def get_str(self, data_bytes: bytes) -> str:
+        """convert data bytes from server back into str"""
+        return data_bytes.decode('utf-8')
