@@ -10,7 +10,7 @@ Create a store method that takes a data argument and returns a string. The
 Type-annotate store correctly. Remember that data can be a str, bytes, int
  or float
 """
-from typing import Callable, Counter, Optional, Union
+from typing import Callable, Optional, Union
 import redis
 import sys
 import uuid
@@ -42,6 +42,22 @@ def call_history(method: Callable) -> Callable:
         self._redis.rpush(out_list_key, str(args))
         return output
     return history_wrapper
+
+
+def replay(method: Callable) -> None:
+    """function displays the history of calls of a particular function"""
+    key = method.__qualname__
+    inputs = key + ":inputs"
+    outputs = key + ":outputs"
+    server = method.__self__._redis
+    count = server.get(key).decode("utf-8")
+    print(f"{key} was called {count} times:")
+    input_list = server.lrange(inputs, 0, -1)
+    output_list = server.lrange(outputs, 0, -1)
+    zipped = list(zip(input_list, output_list))
+    for k, v in zipped:
+        attr, result = k.decode("utf-8"), k.decode("utf-8")
+        print(f"{key}(*{attr}) -> {result}")
 
 
 class Cache:
