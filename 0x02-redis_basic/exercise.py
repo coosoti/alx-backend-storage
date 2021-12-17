@@ -31,15 +31,14 @@ def count_calls(method: Callable) -> Callable:
 
 def call_history(method: Callable) -> Callable:
     """store the history of inputs and outputs for a particular function"""
-    in_list_key = method.__qualname__ + ":inputs"
-    out_list_key = method.__qualname__ + ":outputs"
-
     @wraps(method)
     def history_wrapper(self, *args, **kwargs):
         """set list keys to a wrapped function"""
+        in_list_key = method.__qualname__ + ":inputs"
+        out_list_key = method.__qualname__ + ":outputs"
         self._redis.rpush(in_list_key, str(args))
         output = method(self, *args, **kwargs)
-        self._redis.rpush(out_list_key, str(args))
+        self._redis.rpush(out_list_key, str(output))
         return output
     return history_wrapper
 
